@@ -35,7 +35,7 @@
 #define CAN_coolant_recvd (1 << 6)
 #define CAN_new_dataSet_recvd (1 << 7)
 #define CAN_voltage_recvd (1 << 8)
-#define CAN_measurements_requested (1 << 9)
+#define autoplay_changed (1 << 9)
 #define disp_mode_changed (1 << 10)
 #define CAN_allowAutoRefresh (1 << 11)          // otherwise means "Aux" has been detected
 #define ECC_present (1 << 12)
@@ -67,6 +67,7 @@ char DisplayMsg[1024], CAN_MsgArray[128][8], title_buffer[64], artist_buffer[64]
 char coolant_buffer[32], speed_buffer[32], voltage_buffer[32];
 // display mode 0 -> song metadata and general status messages, 1 -> body data, 2 -> single-line body data, -1 -> prevent screen updates
 volatile int disp_mode=-1;
+volatile bool autoplay_triggered = false;
 // time to compare against
 unsigned long last_millis=0, last_millis_req=0, last_millis_disp=0, last_millis_aux=0;
 // body data
@@ -112,6 +113,9 @@ void setup(){
     settings.putBool("eccpresent", 0);
     settings.putBool("vectra", 0);
     settings.putUInt("identifier", 0);
+  }
+  if(!settings.isKey("autoplay")){
+    settings.putBool("autoplay", 0);            // initialize autoplay key to false (disabled) by default
   }
   bool init_setupComplete=settings.getBool("setupcomplete", 0);   // prefs init
   if(!init_setupComplete){     // this should only be executed on first boot
@@ -366,6 +370,16 @@ void eventHandlerTask(void *pvParameters){
       vTaskResume(canProcessTaskHandle);
       vTaskResume(canDisplayTaskHandle);
       vTaskResume(canWatchdogTaskHandle);
+    }
+
+    if(checkFlag(autoplay_changed)){
+      clearFlag(autoplay_changed);
+      bool autoPlay = getPreferencesBool("autoplay");
+      if(disp_mode != -1){
+        writeTextToDisplay(1, "Settings", (char*)(autoPlay ? "Autoplay On" : "Autoplay Off"), "");
+        vTaskDelay(1000);
+        setFlag(DIS_forceUpdate);
+      }
     }
 
     A2DP_EventHandler();          // process bluetooth and audio flags set by A2DP callbacks

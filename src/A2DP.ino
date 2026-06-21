@@ -85,12 +85,21 @@ void A2DP_EventHandler(){
     writeTextToDisplay();
   }
 
-  if(checkFlag(bt_state_changed) && disp_mode==0){                                   // mute external DAC when not playing
+  if(checkFlag(bt_state_changed)){                                   // connection state changed
     if(checkFlag(bt_connected)){
       a2dp_sink.set_volume(127);        // workaround to ensure max volume being applied on successful connection
-      writeTextToDisplay(1, "", "Bluetooth connected", (char*)a2dp_sink.get_peer_name());
+      if(disp_mode==0){
+        writeTextToDisplay(1, "", "Bluetooth connected", (char*)a2dp_sink.get_peer_name());
+      }
+      // Automatically start playback if the autoplay feature is enabled
+      if(getPreferencesBool("autoplay")){        
+        vTaskDelay(pdMS_TO_TICKS(1500)); // wait for AVRCP to establish
+        a2dp_sink.play();
+      }
     } else {
-      writeTextToDisplay(1, "", "Bluetooth disconnected", "");
+      if(disp_mode==0){
+        writeTextToDisplay(1, "", "Bluetooth disconnected", "");
+      }
     }
     clearFlag(bt_state_changed);
   }

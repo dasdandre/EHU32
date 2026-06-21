@@ -663,8 +663,18 @@ void canActionEhuButton3(bool btn_state, unsigned int btn_ms_held){
   }
 }
 
-// no action
+// toggles the autoplay feature setting
 void canActionEhuButton4(bool btn_state, unsigned int btn_ms_held){
+  if (btn_ms_held < 500) {
+    autoplay_change_triggered = false;
+  } else if (!autoplay_change_triggered) {
+    autoplay_change_triggered = true;
+    bool currentAutoplay = getPreferencesBool("autoplay");
+    setPreferencesBool("autoplay", !currentAutoplay);
+    
+    // Set flag to update the screen in the eventHandlerTask
+    setFlag(autoplay_changed);
+  }
 }
 
 // no action
