@@ -15,6 +15,7 @@ Compatible with vehicles equipped with CID/GID/BID/TID display units, additional
   * prints **Artist**, **Track title** and **Album**, just like regular CD playback would
   * this is the default mode, otherwise accessible by long pressing "1"
 - **automatically reconnects** to your phone when the radio is started
+- **autoplay** automatically starts music playback upon connection. Can be enabled/disabled by long pressing "4". Setting will be stored.
 - alternatively, EHU32 can also display live data, such as vehicle speed, RPMs, coolant temperature and battery voltage
   * accessible by long pressing "2" on the radio panel
   * for single line displays, "3" prints just the coolant temperature
@@ -92,6 +93,29 @@ CONFIG_TWAI_ERRATA_FIX_RX_FIFO_CORRUPT=y
 # end of TWAI configuration
 ```
 In Arduino IDE set the following: Events on core 0, Arduino on core 1, partition scheme - Minimal SPIFFS.
+
+## Flashing updates over-the-air (OTA)
+Once OTA mode is enabled (by holding button **8** for 1 second, displaying `OTA Started` on the screen), connect your laptop/PC to the wireless access point:
+- **SSID:** `EHU32-OTA`
+- **Password:** `ehu32updater`
+
+Since mDNS is disabled in this codebase (`setMdnsEnabled(false)`), the board will **not** show up automatically in the network ports list of the Arduino IDE. 
+
+To flash the compiled binary (`.bin` file), you must upload it via the command line using the **espota** tool.
+
+### Using espota tool
+Depending on your setup, you can use the pre-compiled `espota.exe` included with the ESP32 Arduino core, or the Python script `espota.py`:
+
+**Using `espota.exe` (Windows):**
+```cmd
+%USERPROFILE%\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.17\tools\espota.exe -i 192.168.4.1 -p 3232 -r -f <path_to_your_build_binary.bin>
+```
+
+**Using `espota.py`:**
+```bash
+python espota.py -i 192.168.4.1 -p 3232 -r -f <path_to_your_build_binary.bin>
+```
+
 
 ### Credits
 Depends on Arduino ESP32-A2DP and arduino-audio-tools libraries by pschatzmann: [https://github.com/pschatzmann/ESP32-A2DP](https://github.com/pschatzmann/ESP32-A2DP) [https://github.com/pschatzmann/arduino-audio-tools](https://github.com/pschatzmann/arduino-audio-tools)
