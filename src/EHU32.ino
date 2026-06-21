@@ -67,7 +67,7 @@ char DisplayMsg[1024], CAN_MsgArray[128][8], title_buffer[64], artist_buffer[64]
 char coolant_buffer[32], speed_buffer[32], voltage_buffer[32];
 // display mode 0 -> song metadata and general status messages, 1 -> body data, 2 -> single-line body data, -1 -> prevent screen updates
 volatile int disp_mode=-1;
-volatile bool autoplay_triggered = false;
+volatile bool autoplay_change_triggered = false;
 // time to compare against
 unsigned long last_millis=0, last_millis_req=0, last_millis_disp=0, last_millis_aux=0;
 // body data
